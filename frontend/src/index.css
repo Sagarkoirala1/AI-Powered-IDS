@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background-color: #0e1a1c;
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(232, 163, 61, 0.06), transparent 45%),
+    radial-gradient(circle at 100% 30%, rgba(79, 209, 179, 0.05), transparent 40%);
+  color: #e7efef;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(232, 163, 61, 0.35);
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 2px solid #e8a33d;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Thin scrollbars fit the console feel */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a4247;
+  border-radius: 999px;
+  border: 2px solid #0e1a1c;
+}
+
+/* --- Signature: signal sweep line used on the dashboard header --- */
+@keyframes sweep {
+  0% {
+    transform: translateX(-10%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(110%);
+    opacity: 0;
+  }
+}
+
+.signal-sweep {
+  animation: sweep 3.2s linear infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.pulse-ring {
+  animation: pulse-ring 1.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signal-sweep,
+  .pulse-ring {
+    animation: none !important;
+  }
+}
