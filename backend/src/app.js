@@ -7,13 +7,20 @@ const alertRoutes = require("./routes/alertRoutes");
 
 const app = express();
 
-app.use(cors());
+// Middleware
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}));
+
 app.use(express.json());
 
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/alerts", alertRoutes);
 
+// Test Route
 app.get("/", (req, res) => {
     res.json({
         success: true,
