@@ -4,6 +4,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const alertRoutes = require("./routes/alertRoutes");
+const predictionRoutes = require("./routes/predictionRoutes");
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/alerts", alertRoutes);
+app.use("/api/predict", predictionRoutes);
 
 // Test Route
 app.get("/", (req, res) => {
