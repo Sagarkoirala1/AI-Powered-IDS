@@ -1,6 +1,0 @@
-,BENIGN,BruteForce,DDoS,Other,PortScan
-BENIGN,131939,64,2260,2,2050
-BruteForce,268,655,8,0,0
-DDoS,789,0,22071,0,0
-Other,128,0,1,0,31
-PortScan,32,0,11,0,9536
