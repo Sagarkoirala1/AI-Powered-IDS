@@ -4,9 +4,9 @@ import joblib
 import numpy as np
 
 # Load artifacts
-model = joblib.load("ids_model.pkl")
-scaler = joblib.load("scaler.pkl")
-encoder = joblib.load("encoder.pkl")
+model = joblib.load("model_logistic_regression.joblib")
+scaler = joblib.load("scaler.joblib")
+encoder = joblib.load("label_encoder.joblib")
 
 app = FastAPI(title="IDS ML Service")
 
