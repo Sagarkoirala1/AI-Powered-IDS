@@ -5,26 +5,26 @@ export default {
     extend: {
       colors: {
         base: {
-          DEFAULT: "#0E1A1C",
-          panel: "#152528",
-          alt: "#1B2E32",
-          line: "#2A4247",
+          DEFAULT: "#0B1220",
+          panel: "#121C2E",
+          alt: "#182640",
+          line: "#253552",
         },
         ink: {
-          DEFAULT: "#E7EFEF",
-          muted: "#8FA8AB",
-          faint: "#5C7376",
+          DEFAULT: "#EAF2FB",
+          muted: "#93A6C4",
+          faint: "#58698A",
         },
         signal: {
-          DEFAULT: "#E8A33D",
-          soft: "#F0C27A",
+          DEFAULT: "#2DD4C8",
+          soft: "#7EEAE0",
         },
         state: {
-          safe: "#4FD1B3",
-          low: "#7FA9C7",
-          medium: "#E8A33D",
-          high: "#F0793C",
-          critical: "#E5484D",
+          safe: "#22C55E",
+          low: "#60A5FA",
+          medium: "#FBBF24",
+          high: "#FB923C",
+          critical: "#F87171",
         },
       },
       fontFamily: {

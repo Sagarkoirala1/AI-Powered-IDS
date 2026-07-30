@@ -18,10 +18,10 @@ import { useAlerts } from "../hooks/useAlerts.js";
 import { SEVERITY_ORDER } from "../utils/constants.js";
 
 const SEVERITY_COLORS = {
-  Low: "#7FA9C7",
-  Medium: "#E8A33D",
-  High: "#F0793C",
-  Critical: "#E5484D",
+  Low: "#60A5FA",
+  Medium: "#FBBF24",
+  High: "#FB923C",
+  Critical: "#F87171",
 };
 
 export default function Dashboard() {
@@ -145,8 +145,8 @@ export default function Dashboard() {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ background: "#152528", border: "1px solid #2A4247", borderRadius: 8, fontSize: 12 }}
-                  itemStyle={{ color: "#E7EFEF" }}
+                  contentStyle={{ background: "#121C2E", border: "1px solid #253552", borderRadius: 8, fontSize: 12 }}
+                  itemStyle={{ color: "#EAF2FB" }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -167,15 +167,15 @@ export default function Dashboard() {
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={attackTypeData} layout="vertical" margin={{ left: 8, right: 16 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2A4247" horizontal={false} />
-                <XAxis type="number" tick={{ fill: "#8FA8AB", fontSize: 11 }} stroke="#2A4247" allowDecimals={false} />
-                <YAxis type="category" dataKey="name" tick={{ fill: "#8FA8AB", fontSize: 11 }} stroke="#2A4247" width={120} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#253552" horizontal={false} />
+                <XAxis type="number" tick={{ fill: "#93A6C4", fontSize: 11 }} stroke="#253552" allowDecimals={false} />
+                <YAxis type="category" dataKey="name" tick={{ fill: "#93A6C4", fontSize: 11 }} stroke="#253552" width={120} />
                 <Tooltip
                   cursor={{ fill: "rgba(232,163,61,0.08)" }}
-                  contentStyle={{ background: "#152528", border: "1px solid #2A4247", borderRadius: 8, fontSize: 12 }}
-                  itemStyle={{ color: "#E7EFEF" }}
+                  contentStyle={{ background: "#121C2E", border: "1px solid #253552", borderRadius: 8, fontSize: 12 }}
+                  itemStyle={{ color: "#EAF2FB" }}
                 />
-                <Bar dataKey="count" fill="#E8A33D" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="count" fill="#FBBF24" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
