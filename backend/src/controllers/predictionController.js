@@ -50,23 +50,16 @@ exports.predictAttack = async (req, res) => {
             });
         }
 
-        // Decide severity
+       // Decide severity
         let severity = "Low";
 
-        if (attackName.includes("dos")) {
-            severity = "Critical";
-        }
-        else if (
-            attackName.includes("heartbleed") ||
-            attackName.includes("infiltration")
+        if (
+            attackName.includes("ddos") ||
+            attackName.includes("dos")
         ) {
             severity = "Critical";
         }
-        else if (
-            attackName.includes("bot") ||
-            attackName.includes("patator") ||
-            attackName.includes("web attack")
-        ) {
+        else if (attackName.includes("brute")) {
             severity = "High";
         }
         else if (attackName.includes("portscan")) {
