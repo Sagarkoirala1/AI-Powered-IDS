@@ -18,8 +18,8 @@ export default function AppShell({ children }) {
         <div className="mb-8 flex items-center gap-2 px-1">
           <Radar className="text-signal" size={20} strokeWidth={1.75} />
           <div className="leading-tight">
-            <p className="font-display text-sm font-semibold tracking-wide">Sentry IDS</p>
-            <p className="font-mono text-[10px] text-ink-faint">v1.0 console</p>
+            <p className="font-display text-sm font-semibold tracking-wide">AI IDS</p>
+            <p className="font-mono text-[10px] text-ink-faint">detect</p>
           </div>
         </div>
 

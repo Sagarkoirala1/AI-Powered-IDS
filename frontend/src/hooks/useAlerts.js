@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import api from "../api/axios.js";
-import { runSimulatedScan } from "../utils/simulate.js";
+import samples from "../samples";
+
 
 const POLL_INTERVAL = Number(import.meta.env.VITE_POLL_INTERVAL) || 5000;
 
@@ -60,14 +61,40 @@ export function useAlerts({ pollIntervalMs = POLL_INTERVAL, auto = true } = {}) 
    * POST /alerts endpoint so it shows up in the table/stats like any
    * other alert. No AI/ML or backend code is touched by this.
    */
-  const simulateIntrusion = useCallback(async () => {
-    const result = runSimulatedScan();
-    if (result.detected) {
-      await api.post("/alerts", result.sample);
-      await fetchAll({ silent: true });
-    }
-    return result;
-  }, [fetchAll]);
+const simulateIntrusion = useCallback(async () => {
+
+    // Pick a random sample
+    const sample = samples[Math.floor(Math.random() * samples.length)];
+
+    // Send sample to backend
+    const response = await api.post("/predict", sample);
+
+    // Refresh dashboard
+    await fetchAll({ silent: true });
+
+    return {
+
+        detected: response.data.detected,
+
+        sample: {
+
+            sourceIP: sample.sourceIP,
+
+            destinationIP: sample.destinationIP,
+
+            protocol: sample.protocol,
+
+            attackType: response.data.prediction,
+
+            confidence: response.data.confidence,
+
+            severity: response.data.alert?.severity || "None"
+
+        }
+
+    };
+
+}, [fetchAll]);
 
   return { alerts, stats, loading, error, refetch: fetchAll, updateStatus, removeAlert, simulateIntrusion };
 }
