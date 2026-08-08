@@ -11,12 +11,12 @@ Start-Process powershell -ArgumentList @(
 Start-Process powershell -ArgumentList @(
     "-NoExit",
     "-Command",
-    "Set-Location '$root\backend'; npm run dev"
+    "Set-Location '$root\backend';conda activate intrusion; npm run dev"
 )
 
 # Start Frontend
 Start-Process powershell -ArgumentList @(
     "-NoExit",
     "-Command",
-    "Set-Location '$root\frontend'; npm run dev"
+    "Set-Location '$root\frontend';conda activate intrusion; npm run dev"
 )
