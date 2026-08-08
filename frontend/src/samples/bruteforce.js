@@ -1,4 +1,5 @@
 export default {
+  name: "bruteforce",
   sourceIP: "192.168.1.101",
   destinationIP: "10.0.0.20",
   protocol: "TCP",

@@ -1,4 +1,5 @@
 export default {
+   name: "ddos",
   sourceIP: "192.168.1.200",
   destinationIP: "10.0.0.5",
   protocol: "TCP",

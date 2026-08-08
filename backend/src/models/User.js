@@ -27,25 +27,35 @@ const UserSchema = new mongoose.Schema(
             type: String,
             enum: ["admin", "analyst"],
             default: "admin"
+        },
+        // OTP Verification Fields
+        isVerified: {
+            type: Boolean,
+            default: false
+        },
+        otp: {
+            type: String
+        },
+        otpExpiresAt: {
+            type: Date
         }
     },
     { timestamps: true }
 );
 
-// Pre-save hook: Hash the password before saving it to MongoDB
-// Note: No 'next' parameter is used here because it is an async function.
+// Correct Async Pre-Save Hook (No 'next' parameter required)
 UserSchema.pre("save", async function () {
-    // 1. If the password hasn't been modified, exit the hook early
+    // If password hasn't been modified (e.g. updating OTP fields), skip hashing
     if (!this.isModified("password")) {
-        return; 
+        return;
     }
-    
-    // 2. Hash the password
+
+    // Hash the password
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Method helper to compare passwords during authentication/login
+// Helper method to compare passwords
 UserSchema.methods.comparePassword = async function (candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);
 };
