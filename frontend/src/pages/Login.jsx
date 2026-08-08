@@ -3,15 +3,18 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogIn } from "lucide-react";
 import AuthLayout from "../components/AuthLayout.jsx";
 import FormField from "../components/FormField.jsx";
+import ForgotPasswordModal from "../components/ForgotPasswordModal.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { requestLoginOtp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const [info] = useState(location.state?.message || "");
   const [submitting, setSubmitting] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const onChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -20,8 +23,9 @@ export default function Login() {
     setError("");
     setSubmitting(true);
     try {
-      await login(form.email, form.password);
-      navigate(location.state?.from?.pathname || "/", { replace: true });
+      // Validate credentials; backend emails a one-time sign-in code
+      await requestLoginOtp(form.email, form.password);
+      navigate("/verify-login-otp", { state: { email: form.email } });
     } catch (err) {
       setError(err.response?.data?.message || "Couldn't sign in. Check your credentials.");
     } finally {
@@ -32,6 +36,11 @@ export default function Login() {
   return (
     <AuthLayout title="Sign in" subtitle="Access the intrusion detection console.">
       <form onSubmit={onSubmit} className="space-y-4">
+        {info && (
+          <p className="rounded-md border border-state-safe/30 bg-state-safe/10 px-3 py-2 text-sm text-state-safe">
+            {info}
+          </p>
+        )}
         <FormField
           label="Email"
           type="email"
@@ -53,6 +62,16 @@ export default function Login() {
           placeholder="••••••••"
         />
 
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => setShowForgotPassword(true)}
+            className="text-xs text-signal hover:underline"
+          >
+            Forgot password?
+          </button>
+        </div>
+
         {error && (
           <p className="rounded-md border border-state-critical/30 bg-state-critical/10 px-3 py-2 text-sm text-state-critical">
             {error}
@@ -65,7 +84,7 @@ export default function Login() {
           className="flex w-full items-center justify-center gap-2 rounded-md bg-signal px-4 py-2.5 text-sm font-semibold text-base transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           <LogIn size={16} />
-          {submitting ? "Signing in…" : "Sign in"}
+          {submitting ? "Sending code…" : "Sign in"}
         </button>
       </form>
 
@@ -75,6 +94,10 @@ export default function Login() {
           Register
         </Link>
       </p>
+
+      {showForgotPassword && (
+        <ForgotPasswordModal onClose={() => setShowForgotPassword(false)} />
+      )}
     </AuthLayout>
   );
 }
