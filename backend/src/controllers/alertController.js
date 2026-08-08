@@ -1,9 +1,29 @@
 const Alert = require("../models/Alert");
+const { sendAlertEmail } = require("../services/emailService");
+const { emitNewAlert } = require("../sockets/socket");
 
 // Create Alert
 exports.createAlert = async (req, res) => {
     try {
         const alert = await Alert.create(req.body);
+
+        // 1. Send real-time alert to React Dashboard via WebSockets
+        try {
+            emitNewAlert(alert);
+        } catch (socketErr) {
+            console.warn("Socket broadcast failed:", socketErr.message);
+        }
+
+        // 2. If severity is Critical, send email alert
+        if (alert.severity === "Critical") {
+            const recipientEmail = process.env.ADMIN_EMAIL || req.user?.email;
+            if (recipientEmail) {
+                // Sent asynchronously so it won't delay API response
+                sendAlertEmail(recipientEmail, alert).catch((err) =>
+                    console.error("Critical Alert Email Failed:", err.message)
+                );
+            }
+        }
 
         res.status(201).json({
             success: true,
@@ -84,6 +104,7 @@ exports.deleteAlert = async (req, res) => {
         });
     }
 };
+
 // Update Alert Status
 exports.updateAlertStatus = async (req, res) => {
     try {
@@ -112,6 +133,7 @@ exports.updateAlertStatus = async (req, res) => {
         });
     }
 };
+
 // Dashboard Statistics
 exports.getAlertStats = async (req, res) => {
     try {

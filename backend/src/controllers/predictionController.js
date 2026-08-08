@@ -6,6 +6,7 @@ const { sendAlertEmail } = require("../services/emailService");
 const Alert = require("../models/Alert");
 const User = require("../models/User");
 const aiService = require("../services/aiService");
+const { emitNewAlert } = require("../sockets/socket");
 
 
 // ============================================================
@@ -231,9 +232,16 @@ exports.predictAttack = async (req, res) => {
             alert._id
         );
 
-
+        // --------------------------------------------------
+        // 6. Broadcast to React frontend live via Socket.io
+        // --------------------------------------------------
+        try {
+            emitNewAlert(alert);
+        } catch (socketErr) {
+            console.warn("Socket broadcast failed:", socketErr.message);
+        }
         // ------------------------------------------------------
-        // 6. Email severe attacks
+        // 7. Email severe attacks
         // ------------------------------------------------------
 
         if (
@@ -241,13 +249,18 @@ exports.predictAttack = async (req, res) => {
             severity === "High"
         ) {
 
-            await sendSevereAttackEmail(alert);
+            sendSevereAttackEmail(alert).catch((emailErr) =>
+                console.error(
+                    `Async email failed for row ${i + 1}:`,
+                    emailErr.message
+                )
+            );
 
         }
 
 
         // ------------------------------------------------------
-        // 7. Return response
+        // 8. Return response
         // ------------------------------------------------------
 
         return res.status(200).json({

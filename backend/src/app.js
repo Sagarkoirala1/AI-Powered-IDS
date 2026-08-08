@@ -5,6 +5,7 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const alertRoutes = require("./routes/alertRoutes");
 const predictionRoutes = require("./routes/predictionRoutes");
+const reportRoutes = require("./routes/reportRoutes");
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/alerts", alertRoutes);
 app.use("/api/predict", predictionRoutes);
+app.use("/api/reports", reportRoutes);
 
 // Test Route
 app.get("/", (req, res) => {
