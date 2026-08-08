@@ -28,12 +28,13 @@ export default function Dashboard() {
   const { alerts, stats, loading, error, updateStatus, removeAlert, simulateIntrusion } = useAlerts();
   const [simulating, setSimulating] = useState(false);
   const [simResult, setSimResult] = useState(null);
+  const [selectedAttack, setSelectedAttack] = useState("ddos");
 
   const handleSimulate = async () => {
     setSimulating(true);
     setSimResult(null);
     try {
-      const result = await simulateIntrusion();
+      const result = await simulateIntrusion(selectedAttack);
       setSimResult(result);
     } catch (err) {
       setSimResult({ detected: false, sampleError: true });
@@ -70,18 +71,35 @@ export default function Dashboard() {
           <p className="text-sm text-ink-muted">Live status of monitored network traffic.</p>
         </div>
 
-        <button
-          onClick={handleSimulate}
-          disabled={simulating}
-          className="flex items-center gap-2 self-start rounded-md border border-signal/40 bg-signal/10 px-4 py-2 text-sm font-medium text-signal transition-colors hover:bg-signal/20 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {simulating ? (
-            <Loader2 size={16} strokeWidth={1.75} className="animate-spin" />
-          ) : (
-            <PlayCircle size={16} strokeWidth={1.75} />
-          )}
-          {simulating ? "Running simulation…" : "Simulate Intrusion"}
-        </button>
+       <div className="flex items-center gap-3">
+
+  <select
+    value={selectedAttack}
+    onChange={(e) => setSelectedAttack(e.target.value)}
+    className="rounded-md border border-base-line bg-base-panel px-3 py-2 text-sm text-ink"
+  >
+    <option value="benign">BENIGN</option>
+    <option value="ddos">DDoS</option>
+    <option value="doshulk">DoS Hulk</option>
+    <option value="bruteforce">Brute Force</option>
+    <option value="portscan">PortScan</option>
+  </select>
+
+  <button
+    onClick={handleSimulate}
+    disabled={simulating}
+    className="flex items-center gap-2 rounded-md border border-signal/40 bg-signal/10 px-4 py-2 text-sm font-medium text-signal hover:bg-signal/20 disabled:opacity-60"
+  >
+    {simulating ? (
+      <Loader2 size={16} className="animate-spin" />
+    ) : (
+      <PlayCircle size={16} />
+    )}
+
+    {simulating ? "Running..." : "Simulate"}
+  </button>
+
+</div>
       </div>
 
       {simResult && (
