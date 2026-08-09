@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import api from "../api/axios.js";
+import { runSimulatedScan } from "../utils/simulate.js";
 
 const POLL_INTERVAL =
   Number(import.meta.env.VITE_POLL_INTERVAL) || 5000;
@@ -80,6 +81,40 @@ export function useAlerts({
     [fetchAll]
   );
 
+  // -----------------------------
+  // Simulate an intrusion (Dashboard "Simulate" button)
+  // -----------------------------
+  const simulateIntrusion = useCallback(
+    async (attackKey) => {
+      const result = runSimulatedScan(attackKey);
+      if (result.detected) {
+        await api.post("/alerts", result.sample);
+        await fetchAll({ silent: true });
+      }
+      return result;
+    },
+    [fetchAll]
+  );
+
+  // -----------------------------
+  // Admin: upload a CSV of captured traffic for the AI model to scan
+  // -----------------------------
+  const uploadCsv = useCallback(
+    async (file, model) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("model", model || "auto");
+
+      const res = await api.post("/alerts/upload-csv", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      await fetchAll({ silent: true });
+      return res.data; // { success, data: { totalRows, intrusionsDetected, modelUsed, alerts } }
+    },
+    [fetchAll]
+  );
+
   return {
     alerts,
     stats,
@@ -87,6 +122,8 @@ export function useAlerts({
     error,
     updateStatus,
     removeAlert,
+    simulateIntrusion,
+    uploadCsv,
     refresh: fetchAll,
   };
 }

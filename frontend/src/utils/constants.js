@@ -11,3 +11,20 @@ export const STATUS_STYLES = {
 };
 
 export const SEVERITY_ORDER = ["Low", "Medium", "High", "Critical"];
+
+// Roles returned by the backend (User.role enum: "admin" | "analyst")
+export const ROLES = {
+  ADMIN: "admin",
+  ANALYST: "analyst",
+};
+
+// AI/ML models trained in the AI-ML service (AI-ML/outputs/*.joblib +
+// classification_report_*.txt). "auto" lets the backend pick the
+// best-performing model for the uploaded traffic.
+export const AI_MODELS = [
+  { value: "auto", label: "Auto (best model)" },
+  { value: "logistic_regression", label: "Logistic Regression" },
+  { value: "random_forest", label: "Random Forest" },
+  { value: "svm_linear", label: "SVM (Linear)" },
+  { value: "xgboost", label: "XGBoost" },
+];

@@ -20,8 +20,18 @@ const ATTACK_TYPES = [
   "Malware",
 ];
 
-// Chance that a simulated run is flagged as an intrusion.
+// Chance that a simulated run is flagged as an intrusion (used when no
+// specific attack type is requested).
 const INTRUSION_PROBABILITY = 0.6;
+
+// Maps the Dashboard "attack type" select to a simulated outcome.
+const ATTACK_KEY_MAP = {
+  benign: null, // never flagged
+  ddos: "DDoS",
+  doshulk: "DoS Hulk",
+  bruteforce: "Brute Force",
+  portscan: "Port Scan",
+};
 
 function randomIP() {
   return Array.from({ length: 4 }, () => Math.floor(Math.random() * 254) + 1).join(".");
@@ -44,9 +54,19 @@ function severityFromConfidence(confidence) {
  *  { detected: false, sample: { sourceIP, destinationIP, protocol, confidence } }
  *  { detected: true,  sample: { sourceIP, destinationIP, protocol, confidence, attackType, severity, status } }
  */
-export function runSimulatedScan() {
-  const confidence = Math.floor(Math.random() * 100) + 1;
-  const detected = Math.random() < INTRUSION_PROBABILITY;
+export function runSimulatedScan(attackKey) {
+  const hasKnownKey = attackKey && Object.prototype.hasOwnProperty.call(ATTACK_KEY_MAP, attackKey);
+  const forcedAttackType = hasKnownKey ? ATTACK_KEY_MAP[attackKey] : undefined;
+
+  // "benign" is forced clean; any other known key is forced detected so the
+  // select box on the Dashboard behaves predictably during a demo.
+  const confidence = hasKnownKey
+    ? forcedAttackType
+      ? Math.floor(Math.random() * 45) + 55 // 55–99
+      : Math.floor(Math.random() * 40) + 1 // 1–40, clearly "clean"
+    : Math.floor(Math.random() * 100) + 1;
+
+  const detected = hasKnownKey ? Boolean(forcedAttackType) : Math.random() < INTRUSION_PROBABILITY;
 
   const base = {
     sourceIP: randomIP(),
@@ -63,7 +83,7 @@ export function runSimulatedScan() {
     detected: true,
     sample: {
       ...base,
-      attackType: pick(ATTACK_TYPES),
+      attackType: forcedAttackType || pick(ATTACK_TYPES),
       severity: severityFromConfidence(confidence),
       status: "Active",
     },
