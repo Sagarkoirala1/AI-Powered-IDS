@@ -1,16 +1,20 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, ShieldAlert, User, LogOut, Radar } from "lucide-react";
+import { LayoutDashboard, ShieldAlert, ShieldCheck, User, LogOut, Radar } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
+import { ROLES } from "../utils/constants.js";
 
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/alerts", label: "Alerts", icon: ShieldAlert },
+  { to: "/admin", label: "Admin Panel", icon: ShieldCheck, adminOnly: true },
   { to: "/profile", label: "Profile", icon: User },
 ];
 
 export default function AppShell({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const isAdmin = user?.role === ROLES.ADMIN;
+  const visibleNavItems = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
 
   return (
     <div className="flex min-h-screen bg-base text-ink">
@@ -24,7 +28,7 @@ export default function AppShell({ children }) {
         </div>
 
         <nav className="flex flex-1 flex-col gap-1">
-          {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+          {visibleNavItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
@@ -45,7 +49,15 @@ export default function AppShell({ children }) {
 
         <div className="mt-auto border-t border-base-line pt-4">
           <p className="truncate px-1 text-sm text-ink">{user?.username}</p>
-          <p className="truncate px-1 font-mono text-xs text-ink-faint">{user?.role}</p>
+          <span
+            className={`ml-1 inline-flex w-fit items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide ${
+              isAdmin
+                ? "border-signal/40 bg-signal/10 text-signal"
+                : "border-base-line text-ink-faint"
+            }`}
+          >
+            {user?.role}
+          </span>
           <button
             onClick={() => {
               logout();

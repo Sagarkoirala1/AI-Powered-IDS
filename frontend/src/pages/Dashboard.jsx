@@ -1,21 +1,14 @@
-import { useMemo, useState } from "react";
-import {
-  Activity,
-  ShieldAlert,
-  ShieldCheck,
-  Flame,
-  PlayCircle,
-  Loader2,
-  AlertTriangle,
-  CheckCircle2,
-} from "lucide-react";
+import { useMemo } from "react";
+import { Link } from "react-router-dom";
+import { Activity, ShieldAlert, ShieldCheck, Flame } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import AppShell from "../components/AppShell.jsx";
 import StatCard from "../components/StatCard.jsx";
 import SignalStrip from "../components/SignalStrip.jsx";
 import AlertsTable from "../components/AlertsTable.jsx";
 import { useAlerts } from "../hooks/useAlerts.js";
-import { SEVERITY_ORDER } from "../utils/constants.js";
+import { useAuth } from "../context/AuthContext.jsx";
+import { SEVERITY_ORDER, ROLES } from "../utils/constants.js";
 
 const SEVERITY_COLORS = {
   Low: "#60A5FA",
@@ -25,24 +18,9 @@ const SEVERITY_COLORS = {
 };
 
 export default function Dashboard() {
-  const { alerts, stats, loading, error, updateStatus, removeAlert, simulateIntrusion } = useAlerts();
-  const [simulating, setSimulating] = useState(false);
-  const [simResult, setSimResult] = useState(null);
-  const [selectedAttack, setSelectedAttack] = useState("ddos");
-
-  const handleSimulate = async () => {
-    setSimulating(true);
-    setSimResult(null);
-    try {
-      const result = await simulateIntrusion(selectedAttack);
-      setSimResult(result);
-    } catch (err) {
-      setSimResult({ detected: false, sampleError: true });
-    } finally {
-      setSimulating(false);
-      setTimeout(() => setSimResult(null), 7000);
-    }
-  };
+  const { alerts, stats, loading, error, updateStatus, removeAlert } = useAlerts();
+  const { user } = useAuth();
+  const isAdmin = user?.role === ROLES.ADMIN;
 
   const severityData = useMemo(() => {
     const counts = Object.fromEntries(SEVERITY_ORDER.map((s) => [s, 0]));
@@ -72,58 +50,17 @@ export default function Dashboard() {
         </div>
 
        <div className="flex items-center gap-3">
-
-  <select
-    value={selectedAttack}
-    onChange={(e) => setSelectedAttack(e.target.value)}
-    className="rounded-md border border-base-line bg-base-panel px-3 py-2 text-sm text-ink"
-  >
-    <option value="benign">BENIGN</option>
-    <option value="ddos">DDoS</option>
-    <option value="doshulk">DoS Hulk</option>
-    <option value="bruteforce">Brute Force</option>
-    <option value="portscan">PortScan</option>
-  </select>
-
-  <button
-    onClick={handleSimulate}
-    disabled={simulating}
-    className="flex items-center gap-2 rounded-md border border-signal/40 bg-signal/10 px-4 py-2 text-sm font-medium text-signal hover:bg-signal/20 disabled:opacity-60"
-  >
-    {simulating ? (
-      <Loader2 size={16} className="animate-spin" />
-    ) : (
-      <PlayCircle size={16} />
-    )}
-
-    {simulating ? "Running..." : "Simulate"}
-  </button>
-
+  {isAdmin && (
+    <Link
+      to="/admin"
+      className="flex items-center gap-2 rounded-md border border-base-line px-4 py-2 text-sm font-medium text-ink-muted hover:border-signal/50 hover:text-signal"
+    >
+      <ShieldCheck size={16} />
+      Admin panel
+    </Link>
+  )}
 </div>
       </div>
-
-      {simResult && (
-        <div
-          className={`mb-6 flex items-start gap-2 rounded-md border px-4 py-3 text-sm ${
-            simResult.detected
-              ? "border-state-critical/30 bg-state-critical/10 text-state-critical"
-              : "border-state-safe/30 bg-state-safe/10 text-state-safe"
-          }`}
-        >
-          {simResult.detected ? (
-            <AlertTriangle size={16} className="mt-0.5 shrink-0" />
-          ) : (
-            <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
-          )}
-          <span>
-            {simResult.sampleError
-              ? "Simulation failed — couldn't reach the alerts service."
-              : simResult.detected
-              ? `Intrusion detected — ${simResult.sample.attackType} (${simResult.sample.severity}) from ${simResult.sample.sourceIP} → ${simResult.sample.destinationIP}, ${simResult.sample.confidence}% confidence. Alert logged below.`
-              : `No intrusion detected — simulated ${simResult.sample.protocol} traffic from ${simResult.sample.sourceIP} looked clean (${simResult.sample.confidence}% confidence).`}
-          </span>
-        </div>
-      )}
 
       {error && (
         <div className="mb-6 rounded-md border border-state-critical/30 bg-state-critical/10 px-4 py-3 text-sm text-state-critical">
