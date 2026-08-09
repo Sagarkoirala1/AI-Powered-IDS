@@ -31,12 +31,42 @@ export function AuthProvider({ children }) {
       .finally(() => setInitializing(false));
   }, []);
 
-  const login = useCallback(async (email, password) => {
+  // Step 1: validate credentials -> backend emails a sign-in OTP
+  const requestLoginOtp = useCallback(async (email, password) => {
     const res = await api.post("/auth/login", { email, password });
+    return res.data; // { success, otpRequired, message, email }
+  }, []);
+
+  // Step 2: verify the emailed OTP -> completes sign-in
+  const verifyLoginOtp = useCallback(async (email, otp) => {
+    const res = await api.post("/auth/verify-login-otp", { email, otp });
     localStorage.setItem("ids_token", res.data.token);
     localStorage.setItem("ids_user", JSON.stringify(res.data.user));
     setUser(res.data.user);
     return res.data.user;
+  }, []);
+
+  const resendLoginOtp = useCallback(async (email) => {
+    const res = await api.post("/auth/resend-login-otp", { email });
+    return res.data;
+  }, []);
+
+  // Forgot password: Step 1 - request an OTP by email
+  const forgotPassword = useCallback(async (email) => {
+    const res = await api.post("/auth/forgot-password", { email });
+    return res.data;
+  }, []);
+
+  // Forgot password: Step 2 - verify the OTP, get a short-lived reset token
+  const verifyResetOtp = useCallback(async (email, otp) => {
+    const res = await api.post("/auth/verify-reset-otp", { email, otp });
+    return res.data; // { resetToken, email }
+  }, []);
+
+  // Forgot password: Step 3 - set the new password
+  const resetPassword = useCallback(async (email, resetToken, newPassword) => {
+    const res = await api.post("/auth/reset-password", { email, resetToken, newPassword });
+    return res.data;
   }, []);
 
   const register = useCallback(async (username, email, password) => {
@@ -54,7 +84,20 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, initializing, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        initializing,
+        requestLoginOtp,
+        verifyLoginOtp,
+        resendLoginOtp,
+        register,
+        forgotPassword,
+        verifyResetOtp,
+        resetPassword,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
