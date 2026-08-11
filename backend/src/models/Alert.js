@@ -2,6 +2,18 @@ const mongoose = require("mongoose");
 
 const AlertSchema = new mongoose.Schema(
     {
+        // Link to the user who triggered or uploaded the scan
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            index: true,
+        },
+        userEmail: {
+            type: String,
+            index: true,
+            trim: true,
+            lowercase: true,
+        },
         // Unique flow identifier returned by AI microservice
         flowId: {
             type: String,
@@ -16,6 +28,18 @@ const AlertSchema = new mongoose.Schema(
             type: String,
             required: true,
             default: "Unknown",
+        },
+        srcIp: {
+            type: String,
+        },
+        destIp: {
+            type: String,
+        },
+        srcPort: {
+            type: Number,
+        },
+        destPort: {
+            type: Number,
         },
         protocol: {
             type: String,

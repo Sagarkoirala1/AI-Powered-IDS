@@ -1,13 +1,24 @@
 const Alert = require("../models/Alert");
 const { Parser } = require("json2csv");
 
+// Helper function to build query filters based on user role[cite: 3]
+const buildRoleQuery = (req, extraFilter = {}) => {
+    const query = { ...extraFilter };
+    if (req.user && req.user.role !== "admin") {
+        query.userId = req.user.id || req.user._id;
+    }
+    return query;
+};
+
 /**
- * Export Threat Report as CSV
+ * Export Threat Report as CSV (Filtered by Role)
  * Route: GET /api/reports/csv
  */
 exports.downloadCSVReport = async (req, res) => {
   try {
-    const alerts = await Alert.find().sort({ createdAt: -1 }).lean();
+    // Apply role-based query restriction[cite: 3]
+    const query = buildRoleQuery(req);
+    const alerts = await Alert.find(query).sort({ createdAt: -1 }).lean();
 
     if (!alerts.length) {
       return res.status(404).json({
@@ -19,6 +30,7 @@ exports.downloadCSVReport = async (req, res) => {
     // Define CSV fields
     const fields = [
       { label: "Alert ID", value: "_id" },
+      { label: "User Email", value: "userEmail" },
       { label: "Attack Type", value: "attackType" },
       { label: "Severity", value: "severity" },
       { label: "Source IP", value: "sourceIP" },

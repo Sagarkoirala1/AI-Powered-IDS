@@ -6,7 +6,7 @@ import FormField from "../components/FormField.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
 
 export default function Register() {
-  const { register } = useAuth();
+  const { registerRequestOtp } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ username: "", email: "", password: "" });
   const [error, setError] = useState("");
@@ -19,8 +19,10 @@ export default function Register() {
     setError("");
     setSubmitting(true);
     try {
-      await register(form.username, form.email, form.password);
-      navigate("/", { replace: true });
+      // Validate details; backend emails a one-time verification code
+      // to confirm the email address before the account is created.
+      await registerRequestOtp(form.username, form.email, form.password);
+      navigate("/verify-register-otp", { state: { email: form.email } });
     } catch (err) {
       setError(err.response?.data?.message || "Couldn't create the account.");
     } finally {
@@ -75,7 +77,7 @@ export default function Register() {
           className="flex w-full items-center justify-center gap-2 rounded-md bg-signal px-4 py-2.5 text-sm font-semibold text-base transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           <UserPlus size={16} />
-          {submitting ? "Creating account…" : "Create account"}
+          {submitting ? "Sending code…" : "Create account"}
         </button>
       </form>
 

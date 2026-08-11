@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import AppShell from "../components/AppShell.jsx";
 import AlertsTable from "../components/AlertsTable.jsx";
+import DownloadReportButton from "../components/DownloadReportButton.jsx";
 import { useAlerts } from "../hooks/useAlerts.js";
 import { SEVERITY_ORDER } from "../utils/constants.js";
 
@@ -26,11 +27,18 @@ export default function Alerts() {
 
   return (
     <AppShell>
-      <div className="mb-6 flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-semibold text-ink">Alerts</h1>
-        <p className="text-sm text-ink-muted">
-          {loading ? "Loading…" : `${filtered.length} of ${alerts.length} alerts shown`}
-        </p>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <h1 className="font-display text-2xl font-semibold text-ink">Alerts</h1>
+          <p className="text-sm text-ink-muted">
+            {loading ? "Loading…" : `${filtered.length} of ${alerts.length} alerts shown`}
+          </p>
+        </div>
+        <DownloadReportButton
+          alerts={filtered}
+          filename="intrusion-alerts-report.csv"
+          label="Download report"
+        />
       </div>
 
       {error && (

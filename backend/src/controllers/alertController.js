@@ -2,10 +2,25 @@ const Alert = require("../models/Alert");
 const { sendAlertEmail } = require("../services/emailService");
 const { emitNewAlert } = require("../sockets/socket");
 
+// Helper function to build query filters based on user role
+const buildRoleQuery = (req, extraFilter = {}) => {
+    const query = { ...extraFilter };
+    if (req.user && req.user.role !== "admin") {
+        query.user = req.user.id || req.user._id;
+    }
+    return query;
+};
+
 // Create Alert
 exports.createAlert = async (req, res) => {
     try {
-        const alert = await Alert.create(req.body);
+        // Automatically attach the logged-in user's ID to the alert document
+        const alertData = {
+            ...req.body,
+            user: req.user ? (req.user.id || req.user._id) : req.body.user,
+        };
+
+        const alert = await Alert.create(alertData);
 
         // 1. Send real-time alert to React Dashboard via WebSockets
         try {
@@ -37,10 +52,11 @@ exports.createAlert = async (req, res) => {
     }
 };
 
-// Get All Alerts
+// Get All Alerts (Filtered by Role)
 exports.getAlerts = async (req, res) => {
     try {
-        const alerts = await Alert.find().sort({ createdAt: -1 });
+        const query = buildRoleQuery(req);
+        const alerts = await Alert.find(query).sort({ createdAt: -1 });
 
         res.status(200).json({
             success: true,
@@ -55,15 +71,16 @@ exports.getAlerts = async (req, res) => {
     }
 };
 
-// Get Single Alert
+// Get Single Alert (Ownership check for regular users)
 exports.getAlert = async (req, res) => {
     try {
-        const alert = await Alert.findById(req.params.id);
+        const query = buildRoleQuery(req, { _id: req.params.id });
+        const alert = await Alert.findOne(query);
 
         if (!alert) {
             return res.status(404).json({
                 success: false,
-                message: "Alert not found",
+                message: "Alert not found or unauthorized",
             });
         }
 
@@ -79,15 +96,16 @@ exports.getAlert = async (req, res) => {
     }
 };
 
-// Delete Alert
+// Delete Alert (Ownership check for regular users)
 exports.deleteAlert = async (req, res) => {
     try {
-        const alert = await Alert.findById(req.params.id);
+        const query = buildRoleQuery(req, { _id: req.params.id });
+        const alert = await Alert.findOne(query);
 
         if (!alert) {
             return res.status(404).json({
                 success: false,
-                message: "Alert not found",
+                message: "Alert not found or unauthorized",
             });
         }
 
@@ -105,27 +123,26 @@ exports.deleteAlert = async (req, res) => {
     }
 };
 
-// Update Alert Status
+// Update Alert Status (Ownership check for regular users)
 exports.updateAlertStatus = async (req, res) => {
     try {
-        const alert = await Alert.findById(req.params.id);
+        const query = buildRoleQuery(req, { _id: req.params.id });
+        const alert = await Alert.findOne(query);
 
         if (!alert) {
             return res.status(404).json({
                 success: false,
-                message: "Alert not found",
+                message: "Alert not found or unauthorized",
             });
         }
 
         alert.status = req.body.status || alert.status;
-
         await alert.save();
 
         res.status(200).json({
             success: true,
             data: alert,
         });
-
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -134,22 +151,15 @@ exports.updateAlertStatus = async (req, res) => {
     }
 };
 
-// Dashboard Statistics
+// Dashboard Statistics (Filtered by Role)
 exports.getAlertStats = async (req, res) => {
     try {
-        const total = await Alert.countDocuments();
+        const baseQuery = buildRoleQuery(req);
 
-        const active = await Alert.countDocuments({
-            status: "Active",
-        });
-
-        const resolved = await Alert.countDocuments({
-            status: "Resolved",
-        });
-
-        const critical = await Alert.countDocuments({
-            severity: "Critical",
-        });
+        const total = await Alert.countDocuments(baseQuery);
+        const active = await Alert.countDocuments({ ...baseQuery, status: "Active" });
+        const resolved = await Alert.countDocuments({ ...baseQuery, status: "Resolved" });
+        const critical = await Alert.countDocuments({ ...baseQuery, severity: "Critical" });
 
         res.json({
             success: true,
@@ -160,7 +170,6 @@ exports.getAlertStats = async (req, res) => {
                 critical,
             },
         });
-
     } catch (error) {
         res.status(500).json({
             success: false,
