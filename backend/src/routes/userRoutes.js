@@ -1,15 +1,21 @@
 const express = require("express");
 const router = express.Router();
+const {
+  registerUser,
+  verifyOTP,
+  loginUser,
+  forgotPassword,
+  verifyResetOTP,
+  resetPassword,
+} = require("../controllers/authController");
 
-const { protect } = require("../middleware/authMiddleware");
+router.post("/register", registerUser);
+router.post("/verify-otp", verifyOTP);
+router.post("/login", loginUser);
 
-// Protected Route
-router.get("/profile", protect, (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: "Access Granted",
-        user: req.user,
-    });
-});
+// Forgot password endpoints
+router.post("/forgot-password", forgotPassword);
+router.post("/verify-reset-otp", verifyResetOTP);
+router.post("/reset-password", resetPassword);
 
 module.exports = router;
